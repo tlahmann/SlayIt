@@ -1,0 +1,3 @@
+enum DevStates {
+  DEBUG, DEPLOY
+}
