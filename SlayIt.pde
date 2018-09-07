@@ -15,9 +15,11 @@ private static DevStates devState = DevStates.DEPLOY; // Development state, can 
 
 public static PApplet canvas;
 private Player player;
-FFT fft;
+private FFT fft;
 private GUI gui;
 private final String SONG = "Cryptex_Slay_It_HQ.mp3";
+
+private float[] fftMax;
 
 private Dodecahedron dode;
 private Laser pew;
@@ -38,6 +40,7 @@ void setup() {
   Ani.init(this);
 
   fft = new FFT( player.song().bufferSize(), player.song().sampleRate() );
+  fftMax = new float[]{1, 1, 1, 1, 1};
 
   //loadColors(0);
   initialize();
@@ -48,13 +51,21 @@ void draw() {
 
   fft.forward( player.song().mix );
 
+  fill(255);
   dode.update(player.song().position());
   for (int i = 0; i < 5; i++) {
-    dode.spike(i, fft.getBand(i*20) * 5);
-    dode.spike(i+5, fft.getBand(i*20) * 5);
-    dode.spike(i+10, fft.getBand(i*20) * 5);
-    dode.spike(i+15, fft.getBand(i*20) * 5);
-    text(i*20 + " : " +fft.getBand(i*20) * 5, 30, 30 + i*25);
+    float extend = map(fft.getBand(i*20), 0, fftMax[i], 0, 1);
+    dode.spike(i, extend * 500);
+    dode.spike(i+5, extend * 500);
+    dode.spike(i+10, extend * 500);
+    dode.spike(i+15, extend * 500);
+    String sfft = nf(fft.getBand(i*20) * 5, 3, 3);
+    String sfftm = nf(fftMax[i] * 5, 3, 3);
+    String se = nf(extend * 100, 3, 1);
+    text(i*20 + " : " + sfft + " || " + sfftm + " (" + se + "%)", 30, 30 + i*25);
+    if (fft.getBand(i*20) > fftMax[i]) {
+      fftMax[i] = fft.getBand(i*20);
+    }
   }
   dode.display();
 
